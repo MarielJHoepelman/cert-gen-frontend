@@ -52,3 +52,8 @@ export const Button = styled.button`
     border: 1px solid #2e444e;
     padding: 5px 10px;
 `;
+
+export const ButtonsWrapper = styled.div`
+    display: flex;
+    justify-content: space-evenly;
+`;

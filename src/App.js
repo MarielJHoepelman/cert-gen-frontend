@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useState } from "react";
 import Papa from "papaparse";
-import { Title, BodyWrapper, Label, Form, FormWrapper, Button, Input } from "./styles/index"
+import { Title, BodyWrapper, Label, Form, FormWrapper, Button, Input, ButtonsWrapper } from "./styles/index"
 
 
 function App() {
@@ -11,10 +11,9 @@ function App() {
     setData({...data, [event.target.name]: event.target.value})
   };
 
-  //todo: create capitalize function
   //instructions page
   //preview view
-//disable button until from is completed and valid
+  //disable button until from is completed and valid
 
   const csvHandler = (event) => {
     // console.log(event.target.files[0])
@@ -22,28 +21,36 @@ function App() {
       header: true,
       skipEmptyLines: true,
       complete: function (results) {
-        // console.log(results.data)
         let participants = results.data.map(participant => {
           return participant["Participant Name"]
         });
-        console.log(participants)
+        setData({...data, participants})
       },
     })
   };
 
-  const handleOnSubmit = async (event) => {
-    event.preventDefault();
-
-    const fetchData = await fetch("http://localhost:3000/certificates", {
+   const fetchData = async (data) => {
+     await fetch("http://localhost:3000/certificates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({event: data})
     });
+   };
+
+
+  const handleOnSubmit = async (event) => {
+    event.preventDefault();
+    if(event?.nativeEvent?.submitter?.name === 'preview') {
+      await fetchData({...data, preview: true});
+      return
+    }
+
+    await fetchData(data);
   }
+
 
   return (
     <BodyWrapper className="App">
-
         <Title>Certificate Generator</Title>
       <FormWrapper>
         <Form onSubmit={handleOnSubmit}>
@@ -55,7 +62,10 @@ function App() {
           <Input onChange={handleOnChange} type="text" id="speaker "name="speaker" required/>
           <Label htmlFor="participants">Upload participants:</Label>
           <Input onChange={csvHandler} type="file" id="participants "name="participants" accept=".csv" required />
-          <Button type="submit">Generate</Button>
+          <ButtonsWrapper>
+            <Button type="submit" name='preview'>Preview</Button>
+            <Button type="submit" name='generate'>Generate</Button>
+          </ButtonsWrapper>
         </Form>
       </FormWrapper>
     </BodyWrapper>
